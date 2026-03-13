@@ -1,0 +1,74 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Mini Chat</title>
+
+    <style>
+      body {
+        font-family: Arial;
+        max-width: 600px;
+        margin: auto;
+      }
+
+      #messages {
+        border: 1px solid #ccc;
+        height: 300px;
+        overflow: auto;
+        padding: 10px;
+      }
+
+      .message {
+        margin-bottom: 8px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h2>Mini Chat</h2>
+
+    <input id="author" placeholder="Pseudo" />
+
+    <div id="messages"></div>
+
+    <input id="content" placeholder="Message" />
+    <button onclick="send()">Send</button>
+
+    <script>
+      const API = "http://localhost:9090/api/messages";
+
+      async function load() {
+        const res = await fetch(API);
+        const data = await res.json();
+
+        const box = document.getElementById("messages");
+        box.innerHTML = "";
+
+        data.forEach((m) => {
+          box.innerHTML += `<div class="message">
+<b>${m.author}</b> (${m.time}) : ${m.content}
+</div>`;
+        });
+      }
+
+      async function send() {
+        const author = document.getElementById("author").value;
+        const content = document.getElementById("content").value;
+
+        await fetch(API, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ author, content }),
+        });
+
+        document.getElementById("content").value = "";
+
+        load();
+      }
+
+      setInterval(load, 4000);
+
+      load();
+    </script>
+  </body>
+</html>
